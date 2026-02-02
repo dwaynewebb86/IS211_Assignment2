@@ -9,39 +9,61 @@ def processData(data):
     import datetime
     import logging
     import csv
-    logging.basicConfig(level=logging.INFO)
-    logging.info("Data processing started")#function to download data
-def downloadData(url):
-    import urllib.request
-    with urllib.request.urlopen(url) as response:
-        return response.read()
-    person_id = row[0]
+    logger = logging.getLogger('assignment2')
+    log_dict = {}
+    
+    lines = data.decode('utf-8').splitlines()
+    reader = csv.reader(lines)
+    
+    for line_num, row in enumerate(reader, start=1):
+        if len(row) < 3:  # Add this check!
+            continue
+        
+        person_id = row[0]
         name = row[1]
         birthday_str = row[2]
-    processed = []
-    reader = csv.reader(data.decode('utf-8').splitlines())
-    for row in reader:
-        processed.append(row)
-    logging.info("Data processing completed")
-    try:
-        birthday = datetime.datetime.strptime(birthday_str, "%d/%m/%Y")
-    except ValueError as e:
-        logging.error(f"Error parsing date for {name}: {e}")
-        continue
-    return processed
+        
+        try:
+            birthday = datetime.datetime.strptime(birthday_str, "%d/%m/%Y")
+            log_dict[int(person_id)] = (name, birthday)
+        except ValueError:
+            logger.error(f"Error processing line #{line_num} for ID #{person_id}")
+    return log_dict
 
 
 #function for user input
-def displayfunction():
-    name = input("Enter your name: ")
-    class UserNotFoundError(Exception):
-        pass
-    print("No user found")
-    print(f"Hello, {name}!")
+def displayfunction(id, userData):
+    if id in userData:
+        name, birthday = userData[id]
+        date_str = birthday.strftime("%Y-%m-%d")
+        print(f"Person #{id} is {name} with a birthday of {date_str}")
+    else:
+        print("No user found with that id")
 
 #main function
 def main():
-    url = "http://example.com/data"
-    data = downloadData(url)
-    processed_data = processData(data)
-    displayfunction()
+    import argparse
+    import logging
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--url', required=True, help='URL to the CSV file')
+    args = parser.parse_args()
+    try:
+        csvData = downloadData(args.url)
+    except Exception as e:
+        print(f"Error downloading data: {e}")
+        exit()
+    logging.basicConfig(filename='errors.log', level=logging.ERROR)
+    userData = processData(csvData)
+    while True:
+        user_input = input("Enter an ID to lookup (0 or negative to exit): ")
+        try:
+            user_id = int(user_input)
+        except ValueError:
+            print("Please enter a valid number")
+            continue
+        if user_id <= 0:
+            break
+        displayperson(user_id, userData)
+
+if __name__ == "__main__":
+    main()
