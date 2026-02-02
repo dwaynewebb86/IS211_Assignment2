@@ -1,0 +1,11 @@
+#function to download data
+def downloadData(url):
+    import urllib.request
+    with urllib.request.urlopen(url) as response:
+        data = response.read()
+
+#function to process data
+def processData(data):
+    processed_data = data.decode('utf-8').upper()
+    data = (name, birthday)
+    return processed_data
