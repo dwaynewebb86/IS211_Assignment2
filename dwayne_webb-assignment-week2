@@ -2,16 +2,34 @@
 def downloadData(url):
     import urllib.request
     with urllib.request.urlopen(url) as response:
-        data = response.read()
+        return response.read()
 
 #function to process data
 def processData(data):
-    processed_data = data.decode('utf-8').upper()
     import datetime
-    name = ()
-    birthday = datetime.datetime.now().strftime("%Y-%m-%d")
-    data = (name, birthday)
-    return processed_data
+    import logging
+    import csv
+    logging.basicConfig(level=logging.INFO)
+    logging.info("Data processing started")#function to download data
+def downloadData(url):
+    import urllib.request
+    with urllib.request.urlopen(url) as response:
+        return response.read()
+    person_id = row[0]
+        name = row[1]
+        birthday_str = row[2]
+    processed = []
+    reader = csv.reader(data.decode('utf-8').splitlines())
+    for row in reader:
+        processed.append(row)
+    logging.info("Data processing completed")
+    try:
+        birthday = datetime.datetime.strptime(birthday_str, "%d/%m/%Y")
+    except ValueError as e:
+        logging.error(f"Error parsing date for {name}: {e}")
+        continue
+    return processed
+
 
 #function for user input
 def displayfunction():
